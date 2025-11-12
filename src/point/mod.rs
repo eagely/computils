@@ -1,2 +1,2 @@
-pub mod dynamic_point;
-pub mod static_point;
+pub mod point;
+pub mod u_point;

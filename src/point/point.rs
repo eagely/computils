@@ -1,6 +1,7 @@
+#[derive(Eq, PartialEq, Hash, Clone, Copy)]
 pub struct Point {
-    r: isize,
-    c: isize,
+    pub r: isize,
+    pub c: isize,
 }
 
 impl Point {

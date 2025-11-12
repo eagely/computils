@@ -1,4 +1,4 @@
-use crate::point::static_point::UPoint;
+use crate::point::u_point::UPoint;
 use ndarray::{
     Array2, Dim,
     iter::{IntoIter, Iter, IterMut},

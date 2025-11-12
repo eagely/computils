@@ -1,6 +1,6 @@
 pub struct UPoint {
-    r: usize,
-    c: usize,
+    pub r: usize,
+    pub c: usize,
 }
 
 impl UPoint {
