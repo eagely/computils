@@ -1,11 +1,11 @@
 use std::ops::{Add, Div, Mul, Rem, Sub};
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct NDPoint {
+pub struct NDGridPoint {
     pub coords: Vec<isize>,
 }
 
-impl NDPoint {
+impl NDGridPoint {
     pub fn new(coords: Vec<isize>) -> Self {
         Self { coords }
     }
@@ -21,7 +21,7 @@ impl NDPoint {
         }
     }
 
-    pub fn neighbors(&self) -> Vec<NDPoint> {
+    pub fn neighbors(&self) -> Vec<NDGridPoint> {
         let ndim = self.ndim();
         let mut result = Vec::new();
         let mut deltas = vec![0; ndim];
@@ -29,8 +29,8 @@ impl NDPoint {
         fn generate(
             deltas: &mut Vec<isize>,
             idx: usize,
-            point: &NDPoint,
-            result: &mut Vec<NDPoint>,
+            point: &NDGridPoint,
+            result: &mut Vec<NDGridPoint>,
         ) {
             if idx == deltas.len() {
                 if deltas.iter().any(|&x| x != 0) {
@@ -49,7 +49,7 @@ impl NDPoint {
     }
 }
 
-impl Add for NDPoint {
+impl Add for NDGridPoint {
     type Output = Self;
     fn add(self, other: Self) -> Self::Output {
         assert_eq!(self.ndim(), other.ndim());
@@ -64,7 +64,7 @@ impl Add for NDPoint {
     }
 }
 
-impl Sub for NDPoint {
+impl Sub for NDGridPoint {
     type Output = Self;
     fn sub(self, other: Self) -> Self::Output {
         assert_eq!(self.ndim(), other.ndim());
@@ -79,7 +79,7 @@ impl Sub for NDPoint {
     }
 }
 
-impl Mul for NDPoint {
+impl Mul for NDGridPoint {
     type Output = Self;
     fn mul(self, other: Self) -> Self::Output {
         assert_eq!(self.ndim(), other.ndim());
@@ -94,7 +94,7 @@ impl Mul for NDPoint {
     }
 }
 
-impl Div for NDPoint {
+impl Div for NDGridPoint {
     type Output = Self;
     fn div(self, other: Self) -> Self::Output {
         assert_eq!(self.ndim(), other.ndim());
@@ -109,7 +109,7 @@ impl Div for NDPoint {
     }
 }
 
-impl Rem for NDPoint {
+impl Rem for NDGridPoint {
     type Output = Self;
     fn rem(self, other: Self) -> Self::Output {
         assert_eq!(self.ndim(), other.ndim());
@@ -124,7 +124,7 @@ impl Rem for NDPoint {
     }
 }
 
-impl Add<isize> for NDPoint {
+impl Add<isize> for NDGridPoint {
     type Output = Self;
     fn add(self, rhs: isize) -> Self::Output {
         Self {
@@ -133,7 +133,7 @@ impl Add<isize> for NDPoint {
     }
 }
 
-impl Sub<isize> for NDPoint {
+impl Sub<isize> for NDGridPoint {
     type Output = Self;
     fn sub(self, rhs: isize) -> Self::Output {
         Self {
@@ -142,7 +142,7 @@ impl Sub<isize> for NDPoint {
     }
 }
 
-impl Mul<isize> for NDPoint {
+impl Mul<isize> for NDGridPoint {
     type Output = Self;
     fn mul(self, rhs: isize) -> Self::Output {
         Self {
@@ -151,7 +151,7 @@ impl Mul<isize> for NDPoint {
     }
 }
 
-impl Div<isize> for NDPoint {
+impl Div<isize> for NDGridPoint {
     type Output = Self;
     fn div(self, rhs: isize) -> Self::Output {
         Self {
@@ -160,7 +160,7 @@ impl Div<isize> for NDPoint {
     }
 }
 
-impl Rem<isize> for NDPoint {
+impl Rem<isize> for NDGridPoint {
     type Output = Self;
     fn rem(self, rhs: isize) -> Self::Output {
         Self {
@@ -169,60 +169,47 @@ impl Rem<isize> for NDPoint {
     }
 }
 
-impl Add<NDPoint> for isize {
-    type Output = NDPoint;
-    fn add(self, rhs: NDPoint) -> Self::Output {
-        NDPoint {
+impl Add<NDGridPoint> for isize {
+    type Output = NDGridPoint;
+    fn add(self, rhs: NDGridPoint) -> Self::Output {
+        NDGridPoint {
             coords: rhs.coords.iter().map(|a| self + a).collect(),
         }
     }
 }
 
-impl Sub<NDPoint> for isize {
-    type Output = NDPoint;
-    fn sub(self, rhs: NDPoint) -> Self::Output {
-        NDPoint {
+impl Sub<NDGridPoint> for isize {
+    type Output = NDGridPoint;
+    fn sub(self, rhs: NDGridPoint) -> Self::Output {
+        NDGridPoint {
             coords: rhs.coords.iter().map(|a| self - a).collect(),
         }
     }
 }
 
-impl Mul<NDPoint> for isize {
-    type Output = NDPoint;
-    fn mul(self, rhs: NDPoint) -> Self::Output {
-        NDPoint {
+impl Mul<NDGridPoint> for isize {
+    type Output = NDGridPoint;
+    fn mul(self, rhs: NDGridPoint) -> Self::Output {
+        NDGridPoint {
             coords: rhs.coords.iter().map(|a| self * a).collect(),
         }
     }
 }
 
-impl Div<NDPoint> for isize {
-    type Output = NDPoint;
-    fn div(self, rhs: NDPoint) -> Self::Output {
-        NDPoint {
+impl Div<NDGridPoint> for isize {
+    type Output = NDGridPoint;
+    fn div(self, rhs: NDGridPoint) -> Self::Output {
+        NDGridPoint {
             coords: rhs.coords.iter().map(|a| self / a).collect(),
         }
     }
 }
 
-impl Rem<NDPoint> for isize {
-    type Output = NDPoint;
-    fn rem(self, rhs: NDPoint) -> Self::Output {
-        NDPoint {
+impl Rem<NDGridPoint> for isize {
+    type Output = NDGridPoint;
+    fn rem(self, rhs: NDGridPoint) -> Self::Output {
+        NDGridPoint {
             coords: rhs.coords.iter().map(|a| self % a).collect(),
-        }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::point::n_dimensional::NDPoint;
-
-    #[test]
-    fn test() {
-        let p = NDPoint::new(vec![1, 2]);
-        for n in p.neighbors() {
-            println!("{:?}", n.coords);
         }
     }
 }

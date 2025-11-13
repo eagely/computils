@@ -2,6 +2,10 @@
 name = "computils"
 version = "0.1.0"
 edition = "2024"
+authors = ["Artemiy Smirnov artemiy.smirnov@proton.me"]
+description = "Collection of utilities for competitive programming"
+license = "MIT"
+repository = "https://github.com/eagely/computils"
 
 [dependencies]
 ndarray = "0.17.1"

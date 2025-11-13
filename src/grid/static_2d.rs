@@ -1,8 +1,9 @@
-use crate::point::unsigned::UPoint;
+use crate::grid_point::unsigned::UGridPoint;
 use ndarray::{
     Array2, Dim,
     iter::{IntoIter, Iter, IterMut},
 };
+use std::fmt::{Display, Formatter, Result};
 
 pub struct Static2DGrid<T> {
     pub data: Array2<Option<T>>,
@@ -153,28 +154,32 @@ impl<T> Static2DGrid<T> {
     }
 
     pub fn cardinal_neighbors(&self, r: usize, c: usize) -> impl Iterator<Item = &T> {
-        UPoint::new(r, c)
+        UGridPoint::new(r, c)
             .cardinal_neighbors()
             .into_iter()
             .filter_map(|p| self.get(p.r, p.c))
     }
 
     pub fn all_neighbors(&self, r: usize, c: usize) -> impl Iterator<Item = &T> {
-        UPoint::new(r, c)
+        UGridPoint::new(r, c)
             .all_neighbors()
             .into_iter()
             .filter_map(|p| self.get(p.r, p.c))
     }
 
-    pub fn indexed_cardinal_neighbors(&self, r: usize, c: usize) -> impl Iterator<Item = UPoint> {
-        UPoint::new(r, c)
+    pub fn indexed_cardinal_neighbors(
+        &self,
+        r: usize,
+        c: usize,
+    ) -> impl Iterator<Item = UGridPoint> {
+        UGridPoint::new(r, c)
             .cardinal_neighbors()
             .into_iter()
             .filter(|p| self.get(p.r, p.c).is_some())
     }
 
-    pub fn indexed_all_neighbors(&self, r: usize, c: usize) -> impl Iterator<Item = UPoint> {
-        UPoint::new(r, c)
+    pub fn indexed_all_neighbors(&self, r: usize, c: usize) -> impl Iterator<Item = UGridPoint> {
+        UGridPoint::new(r, c)
             .all_neighbors()
             .into_iter()
             .filter(|p| self.get(p.r, p.c).is_some())
@@ -206,5 +211,39 @@ impl<T> IntoIterator for Static2DGrid<T> {
 
     fn into_iter(self) -> Self::IntoIter {
         self.data.into_iter()
+    }
+}
+
+impl From<&str> for Static2DGrid<char> {
+    fn from(s: &str) -> Self {
+        let lines: Vec<&str> = s.lines().collect();
+        let rows = lines.len();
+        let cols = lines.iter().map(|l| l.chars().count()).max().unwrap_or(0);
+        let mut grid = Static2DGrid::new(rows, cols);
+
+        for (r, line) in lines.iter().enumerate() {
+            for (c, ch) in line.chars().enumerate() {
+                if ch != ' ' {
+                    grid.set(r, c, ch);
+                }
+            }
+        }
+
+        grid
+    }
+}
+
+impl<T: Display> Display for Static2DGrid<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        for r in 0..self.rows() {
+            for c in 0..self.columns() {
+                match self.get(r, c) {
+                    Some(v) => write!(f, "{}", v)?,
+                    None => write!(f, " ")?,
+                }
+            }
+            writeln!(f)?;
+        }
+        Ok(())
     }
 }

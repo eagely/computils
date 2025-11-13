@@ -1,27 +1,27 @@
-use crate::point::n_dimensional::NDPoint;
+use crate::grid_point::n_dimensional::NDGridPoint;
 use std::collections::{
     HashMap,
     hash_map::{IntoValues, Values, ValuesMut},
 };
 
 pub struct NDGrid<T> {
-    pub data: HashMap<NDPoint, T>,
+    pub data: HashMap<NDGridPoint, T>,
 }
 
 impl<T> NDGrid<T> {
-    pub fn new(data: HashMap<NDPoint, T>) -> Self {
+    pub fn new(data: HashMap<NDGridPoint, T>) -> Self {
         Self { data }
     }
 
-    pub fn get(&self, p: &NDPoint) -> Option<&T> {
+    pub fn get(&self, p: &NDGridPoint) -> Option<&T> {
         self.data.get(p)
     }
 
-    pub fn get_mut(&mut self, p: &NDPoint) -> Option<&mut T> {
+    pub fn get_mut(&mut self, p: &NDGridPoint) -> Option<&mut T> {
         self.data.get_mut(p)
     }
 
-    pub fn set(&mut self, p: NDPoint, v: T) -> Option<T> {
+    pub fn set(&mut self, p: NDGridPoint, v: T) -> Option<T> {
         self.data.insert(p, v)
     }
 
@@ -37,15 +37,15 @@ impl<T> NDGrid<T> {
         self.data.values_mut()
     }
 
-    pub fn indexed_iter(&self) -> impl Iterator<Item = (NDPoint, &T)> + '_ {
+    pub fn indexed_iter(&self) -> impl Iterator<Item = (NDGridPoint, &T)> + '_ {
         self.data.iter().map(|(p, v)| (p.clone(), v))
     }
 
-    pub fn indexed_iter_mut(&mut self) -> impl Iterator<Item = (NDPoint, &mut T)> + '_ {
+    pub fn indexed_iter_mut(&mut self) -> impl Iterator<Item = (NDGridPoint, &mut T)> + '_ {
         self.data.iter_mut().map(|(p, v)| (p.clone(), v))
     }
 
-    pub fn into_indexed_iter(self) -> impl Iterator<Item = (NDPoint, T)> {
+    pub fn into_indexed_iter(self) -> impl Iterator<Item = (NDGridPoint, T)> {
         self.data.into_iter()
     }
 
@@ -53,7 +53,7 @@ impl<T> NDGrid<T> {
         self.data.values().all(|v| f(Some(v))) && f(None)
     }
 
-    pub fn indexed_all(&self, f: impl Fn(NDPoint, Option<&T>) -> bool) -> bool {
+    pub fn indexed_all(&self, f: impl Fn(NDGridPoint, Option<&T>) -> bool) -> bool {
         self.data.iter().all(|(p, v)| f(p.clone(), Some(v)))
     }
 
@@ -61,7 +61,7 @@ impl<T> NDGrid<T> {
         self.data.values().any(|v| f(Some(v))) || f(None)
     }
 
-    pub fn indexed_any(&self, f: impl Fn(NDPoint, Option<&T>) -> bool) -> bool {
+    pub fn indexed_any(&self, f: impl Fn(NDGridPoint, Option<&T>) -> bool) -> bool {
         self.data.iter().any(|(p, v)| f(p.clone(), Some(v)))
     }
 
@@ -69,7 +69,7 @@ impl<T> NDGrid<T> {
         self.data.retain(|_, v| f(Some(v)));
     }
 
-    pub fn indexed_retain(&mut self, f: impl Fn(NDPoint, Option<&T>) -> bool) {
+    pub fn indexed_retain(&mut self, f: impl Fn(NDGridPoint, Option<&T>) -> bool) {
         self.data.retain(|p, v| f(p.clone(), Some(v)));
     }
 
@@ -79,8 +79,8 @@ impl<T> NDGrid<T> {
 
     pub fn indexed_map<U>(
         &self,
-        f: impl Fn(NDPoint, Option<&T>) -> Option<U>,
-    ) -> impl Iterator<Item = (NDPoint, Option<U>)> {
+        f: impl Fn(NDGridPoint, Option<&T>) -> Option<U>,
+    ) -> impl Iterator<Item = (NDGridPoint, Option<U>)> {
         self.data
             .iter()
             .map(move |(p, v)| (p.clone(), f(p.clone(), Some(v))))
@@ -98,7 +98,7 @@ impl<T> NDGrid<T> {
         }
     }
 
-    pub fn indexed_update(&mut self, f: impl Fn(NDPoint, Option<&T>) -> Option<T>) {
+    pub fn indexed_update(&mut self, f: impl Fn(NDGridPoint, Option<&T>) -> Option<T>) {
         let mut updates = Vec::new();
         for (p, v) in &self.data {
             if let Some(new_val) = f(p.clone(), Some(v)) {
@@ -110,11 +110,11 @@ impl<T> NDGrid<T> {
         }
     }
 
-    pub fn neighbors(&self, p: NDPoint) -> impl Iterator<Item = &T> {
+    pub fn neighbors(&self, p: NDGridPoint) -> impl Iterator<Item = &T> {
         p.neighbors().into_iter().filter_map(|p| self.get(&p))
     }
 
-    pub fn indexed_neighbors(&self, p: NDPoint) -> impl Iterator<Item = NDPoint> {
+    pub fn indexed_neighbors(&self, p: NDGridPoint) -> impl Iterator<Item = NDGridPoint> {
         p.neighbors().into_iter().filter(|p| self.get(p).is_some())
     }
 }
@@ -129,7 +129,7 @@ impl<T> Default for NDGrid<T> {
 
 impl<'a, T> IntoIterator for &'a NDGrid<T> {
     type Item = &'a T;
-    type IntoIter = Values<'a, NDPoint, T>;
+    type IntoIter = Values<'a, NDGridPoint, T>;
     fn into_iter(self) -> Self::IntoIter {
         self.data.values()
     }
@@ -137,7 +137,7 @@ impl<'a, T> IntoIterator for &'a NDGrid<T> {
 
 impl<'a, T> IntoIterator for &'a mut NDGrid<T> {
     type Item = &'a mut T;
-    type IntoIter = ValuesMut<'a, NDPoint, T>;
+    type IntoIter = ValuesMut<'a, NDGridPoint, T>;
     fn into_iter(self) -> Self::IntoIter {
         self.data.values_mut()
     }
@@ -145,7 +145,7 @@ impl<'a, T> IntoIterator for &'a mut NDGrid<T> {
 
 impl<T> IntoIterator for NDGrid<T> {
     type Item = T;
-    type IntoIter = IntoValues<NDPoint, T>;
+    type IntoIter = IntoValues<NDGridPoint, T>;
     fn into_iter(self) -> Self::IntoIter {
         self.data.into_values()
     }

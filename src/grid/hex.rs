@@ -1,4 +1,4 @@
-use crate::point::hex::HexPoint;
+use crate::grid_point::hex::HexGridPoint;
 use std::collections::{
     HashMap,
     hash_map::{IntoValues, Values, ValuesMut},
@@ -6,11 +6,11 @@ use std::collections::{
 
 #[derive(Clone)]
 pub struct HexGrid<T> {
-    pub data: HashMap<HexPoint, T>,
+    pub data: HashMap<HexGridPoint, T>,
 }
 
 impl<T> HexGrid<T> {
-    pub fn new(data: HashMap<HexPoint, T>) -> Self {
+    pub fn new(data: HashMap<HexGridPoint, T>) -> Self {
         Self { data }
     }
 
@@ -22,15 +22,15 @@ impl<T> HexGrid<T> {
         self.bounds().map(|(min, max)| max.q() - min.q() + 1)
     }
 
-    pub fn get(&self, p: &HexPoint) -> Option<&T> {
+    pub fn get(&self, p: &HexGridPoint) -> Option<&T> {
         self.data.get(p)
     }
 
-    pub fn get_mut(&mut self, p: &HexPoint) -> Option<&mut T> {
+    pub fn get_mut(&mut self, p: &HexGridPoint) -> Option<&mut T> {
         self.data.get_mut(p)
     }
 
-    pub fn set(&mut self, p: HexPoint, v: T) -> Option<T> {
+    pub fn set(&mut self, p: HexGridPoint, v: T) -> Option<T> {
         self.data.insert(p, v)
     }
 
@@ -50,15 +50,15 @@ impl<T> HexGrid<T> {
         self.data.values_mut()
     }
 
-    pub fn indexed_iter(&self) -> impl Iterator<Item = (HexPoint, &T)> {
+    pub fn indexed_iter(&self) -> impl Iterator<Item = (HexGridPoint, &T)> {
         self.data.iter().map(|(p, v)| (*p, v))
     }
 
-    pub fn indexed_iter_mut(&mut self) -> impl Iterator<Item = (HexPoint, &mut T)> {
+    pub fn indexed_iter_mut(&mut self) -> impl Iterator<Item = (HexGridPoint, &mut T)> {
         self.data.iter_mut().map(|(p, v)| (*p, v))
     }
 
-    pub fn into_indexed_iter(self) -> impl Iterator<Item = (HexPoint, T)> {
+    pub fn into_indexed_iter(self) -> impl Iterator<Item = (HexGridPoint, T)> {
         self.data.into_iter()
     }
 
@@ -66,7 +66,7 @@ impl<T> HexGrid<T> {
         self.data.values().all(|v| f(Some(v))) && f(None)
     }
 
-    pub fn indexed_all(&self, f: impl Fn(HexPoint, Option<&T>) -> bool) -> bool {
+    pub fn indexed_all(&self, f: impl Fn(HexGridPoint, Option<&T>) -> bool) -> bool {
         self.data.iter().all(|(p, v)| f(*p, Some(v)))
     }
 
@@ -74,7 +74,7 @@ impl<T> HexGrid<T> {
         self.data.values().any(|v| f(Some(v))) || f(None)
     }
 
-    pub fn indexed_any(&self, f: impl Fn(HexPoint, Option<&T>) -> bool) -> bool {
+    pub fn indexed_any(&self, f: impl Fn(HexGridPoint, Option<&T>) -> bool) -> bool {
         self.data.iter().any(|(p, v)| f(*p, Some(v)))
     }
 
@@ -84,8 +84,8 @@ impl<T> HexGrid<T> {
 
     pub fn indexed_filter(
         &self,
-        f: impl Fn(HexPoint, Option<&T>) -> bool,
-    ) -> impl Iterator<Item = (HexPoint, Option<&T>)> {
+        f: impl Fn(HexGridPoint, Option<&T>) -> bool,
+    ) -> impl Iterator<Item = (HexGridPoint, Option<&T>)> {
         self.data
             .iter()
             .filter(move |(p, v)| f(**p, Some(v)))
@@ -96,7 +96,7 @@ impl<T> HexGrid<T> {
         self.data.retain(|_, v| f(Some(v)));
     }
 
-    pub fn indexed_retain(&mut self, f: impl Fn(HexPoint, Option<&T>) -> bool) {
+    pub fn indexed_retain(&mut self, f: impl Fn(HexGridPoint, Option<&T>) -> bool) {
         self.data.retain(|p, v| f(*p, Some(v)));
     }
 
@@ -106,8 +106,8 @@ impl<T> HexGrid<T> {
 
     pub fn indexed_map<U>(
         &self,
-        f: impl Fn(HexPoint, Option<&T>) -> Option<U>,
-    ) -> impl Iterator<Item = (HexPoint, Option<U>)> {
+        f: impl Fn(HexGridPoint, Option<&T>) -> Option<U>,
+    ) -> impl Iterator<Item = (HexGridPoint, Option<U>)> {
         self.data.iter().map(move |(p, v)| (*p, f(*p, Some(v))))
     }
 
@@ -123,7 +123,7 @@ impl<T> HexGrid<T> {
         }
     }
 
-    pub fn indexed_update(&mut self, f: impl Fn(HexPoint, Option<&T>) -> Option<T>) {
+    pub fn indexed_update(&mut self, f: impl Fn(HexGridPoint, Option<&T>) -> Option<T>) {
         let mut updates = Vec::new();
         for (p, v) in &self.data {
             if let Some(new_val) = f(*p, Some(v)) {
@@ -135,19 +135,19 @@ impl<T> HexGrid<T> {
         }
     }
 
-    pub fn neighbors(&self, p: HexPoint) -> impl Iterator<Item = &T> {
+    pub fn neighbors(&self, p: HexGridPoint) -> impl Iterator<Item = &T> {
         p.neighbors()
             .into_iter()
             .filter_map(move |n| self.data.get(&n))
     }
 
-    pub fn indexed_neighbors(&self, p: HexPoint) -> impl Iterator<Item = HexPoint> {
+    pub fn indexed_neighbors(&self, p: HexGridPoint) -> impl Iterator<Item = HexGridPoint> {
         p.neighbors()
             .into_iter()
             .filter(move |n| self.data.contains_key(n))
     }
 
-    pub fn bounds(&self) -> Option<(HexPoint, HexPoint)> {
+    pub fn bounds(&self) -> Option<(HexGridPoint, HexGridPoint)> {
         if self.data.is_empty() {
             return None;
         }
@@ -167,7 +167,10 @@ impl<T> HexGrid<T> {
                 max_r = p.r();
             }
         }
-        Some((HexPoint::new(min_q, min_r), HexPoint::new(max_q, max_r)))
+        Some((
+            HexGridPoint::new(min_q, min_r),
+            HexGridPoint::new(max_q, max_r),
+        ))
     }
 }
 
@@ -181,7 +184,7 @@ impl<T> Default for HexGrid<T> {
 
 impl<'a, T> IntoIterator for &'a HexGrid<T> {
     type Item = &'a T;
-    type IntoIter = Values<'a, HexPoint, T>;
+    type IntoIter = Values<'a, HexGridPoint, T>;
     fn into_iter(self) -> Self::IntoIter {
         self.data.values()
     }
@@ -189,7 +192,7 @@ impl<'a, T> IntoIterator for &'a HexGrid<T> {
 
 impl<'a, T> IntoIterator for &'a mut HexGrid<T> {
     type Item = &'a mut T;
-    type IntoIter = ValuesMut<'a, HexPoint, T>;
+    type IntoIter = ValuesMut<'a, HexGridPoint, T>;
     fn into_iter(self) -> Self::IntoIter {
         self.data.values_mut()
     }
@@ -197,7 +200,7 @@ impl<'a, T> IntoIterator for &'a mut HexGrid<T> {
 
 impl<T> IntoIterator for HexGrid<T> {
     type Item = T;
-    type IntoIter = IntoValues<HexPoint, T>;
+    type IntoIter = IntoValues<HexGridPoint, T>;
     fn into_iter(self) -> Self::IntoIter {
         self.data.into_values()
     }

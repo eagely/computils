@@ -1,12 +1,12 @@
 use std::ops::{Add, Div, Mul, Rem, Sub};
 
 #[derive(Eq, PartialEq, Hash, Clone, Copy, Debug)]
-pub struct HexPoint {
+pub struct HexGridPoint {
     q: isize,
     r: isize,
 }
 
-impl HexPoint {
+impl HexGridPoint {
     pub fn new(q: isize, r: isize) -> Self {
         Self { q, r }
     }
@@ -31,121 +31,121 @@ impl HexPoint {
         (self - other).length()
     }
 
-    pub fn neighbors(&self) -> [HexPoint; 6] {
+    pub fn neighbors(&self) -> [HexGridPoint; 6] {
         let directions = [
-            HexPoint::new(1, 0),
-            HexPoint::new(1, -1),
-            HexPoint::new(0, -1),
-            HexPoint::new(-1, 0),
-            HexPoint::new(-1, 1),
-            HexPoint::new(0, 1),
+            HexGridPoint::new(1, 0),
+            HexGridPoint::new(1, -1),
+            HexGridPoint::new(0, -1),
+            HexGridPoint::new(-1, 0),
+            HexGridPoint::new(-1, 1),
+            HexGridPoint::new(0, 1),
         ];
 
         directions.map(|dir| *self + dir)
     }
 }
 
-impl Add for HexPoint {
+impl Add for HexGridPoint {
     type Output = Self;
     fn add(self, other: Self) -> Self::Output {
         Self::new(self.q + other.q, self.r + other.r)
     }
 }
 
-impl Sub for HexPoint {
+impl Sub for HexGridPoint {
     type Output = Self;
     fn sub(self, other: Self) -> Self::Output {
         Self::new(self.q - other.q, self.r - other.r)
     }
 }
 
-impl Mul for HexPoint {
+impl Mul for HexGridPoint {
     type Output = Self;
     fn mul(self, other: Self) -> Self::Output {
         Self::new(self.q * other.q, self.r * other.r)
     }
 }
 
-impl Div for HexPoint {
+impl Div for HexGridPoint {
     type Output = Self;
     fn div(self, other: Self) -> Self::Output {
         Self::new(self.q / other.q, self.r / other.r)
     }
 }
 
-impl Rem for HexPoint {
+impl Rem for HexGridPoint {
     type Output = Self;
     fn rem(self, other: Self) -> Self::Output {
         Self::new(self.q % other.q, self.r % other.r)
     }
 }
 
-impl Add<isize> for HexPoint {
+impl Add<isize> for HexGridPoint {
     type Output = Self;
     fn add(self, rhs: isize) -> Self::Output {
         Self::new(self.q + rhs, self.r + rhs)
     }
 }
 
-impl Sub<isize> for HexPoint {
+impl Sub<isize> for HexGridPoint {
     type Output = Self;
     fn sub(self, rhs: isize) -> Self::Output {
         Self::new(self.q - rhs, self.r - rhs)
     }
 }
 
-impl Mul<isize> for HexPoint {
+impl Mul<isize> for HexGridPoint {
     type Output = Self;
     fn mul(self, rhs: isize) -> Self::Output {
         Self::new(self.q * rhs, self.r * rhs)
     }
 }
 
-impl Div<isize> for HexPoint {
+impl Div<isize> for HexGridPoint {
     type Output = Self;
     fn div(self, rhs: isize) -> Self::Output {
         Self::new(self.q / rhs, self.r / rhs)
     }
 }
 
-impl Rem<isize> for HexPoint {
+impl Rem<isize> for HexGridPoint {
     type Output = Self;
     fn rem(self, rhs: isize) -> Self::Output {
         Self::new(self.q % rhs, self.r % rhs)
     }
 }
 
-impl Add<HexPoint> for isize {
-    type Output = HexPoint;
-    fn add(self, rhs: HexPoint) -> Self::Output {
-        HexPoint::new(self + rhs.q, self + rhs.r)
+impl Add<HexGridPoint> for isize {
+    type Output = HexGridPoint;
+    fn add(self, rhs: HexGridPoint) -> Self::Output {
+        HexGridPoint::new(self + rhs.q, self + rhs.r)
     }
 }
 
-impl Sub<HexPoint> for isize {
-    type Output = HexPoint;
-    fn sub(self, rhs: HexPoint) -> Self::Output {
-        HexPoint::new(self - rhs.q, self - rhs.r)
+impl Sub<HexGridPoint> for isize {
+    type Output = HexGridPoint;
+    fn sub(self, rhs: HexGridPoint) -> Self::Output {
+        HexGridPoint::new(self - rhs.q, self - rhs.r)
     }
 }
 
-impl Mul<HexPoint> for isize {
-    type Output = HexPoint;
-    fn mul(self, rhs: HexPoint) -> Self::Output {
-        HexPoint::new(self * rhs.q, self * rhs.r)
+impl Mul<HexGridPoint> for isize {
+    type Output = HexGridPoint;
+    fn mul(self, rhs: HexGridPoint) -> Self::Output {
+        HexGridPoint::new(self * rhs.q, self * rhs.r)
     }
 }
 
-impl Div<HexPoint> for isize {
-    type Output = HexPoint;
-    fn div(self, rhs: HexPoint) -> Self::Output {
-        HexPoint::new(self / rhs.q, self / rhs.r)
+impl Div<HexGridPoint> for isize {
+    type Output = HexGridPoint;
+    fn div(self, rhs: HexGridPoint) -> Self::Output {
+        HexGridPoint::new(self / rhs.q, self / rhs.r)
     }
 }
 
-impl Rem<HexPoint> for isize {
-    type Output = HexPoint;
-    fn rem(self, rhs: HexPoint) -> Self::Output {
-        HexPoint::new(self % rhs.q, self % rhs.r)
+impl Rem<HexGridPoint> for isize {
+    type Output = HexGridPoint;
+    fn rem(self, rhs: HexGridPoint) -> Self::Output {
+        HexGridPoint::new(self % rhs.q, self % rhs.r)
     }
 }
