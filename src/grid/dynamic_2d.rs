@@ -1,15 +1,17 @@
-use crate::point::point::Point;
-use std::collections::HashMap;
+use crate::point::signed::Point;
+use std::collections::{
+    HashMap,
+    hash_map::{IntoValues, Values, ValuesMut},
+};
 
+#[derive(Clone)]
 pub struct Dynamic2DGrid<T> {
     pub data: HashMap<Point, T>,
 }
 
 impl<T> Dynamic2DGrid<T> {
-    pub fn new() -> Self {
-        Self {
-            data: HashMap::new(),
-        }
+    pub fn new(data: HashMap<Point, T>) -> Self {
+        Self { data }
     }
 
     pub fn rows(&self) -> Option<isize> {
@@ -48,11 +50,11 @@ impl<T> Dynamic2DGrid<T> {
         self.data.values_mut()
     }
 
-    pub fn indexed_iter(&self) -> impl Iterator<Item = (Point, &T)> + '_ {
+    pub fn indexed_iter(&self) -> impl Iterator<Item = (Point, &T)> {
         self.data.iter().map(|(p, v)| (*p, v))
     }
 
-    pub fn indexed_iter_mut(&mut self) -> impl Iterator<Item = (Point, &mut T)> + '_ {
+    pub fn indexed_iter_mut(&mut self) -> impl Iterator<Item = (Point, &mut T)> {
         self.data.iter_mut().map(|(p, v)| (*p, v))
     }
 
@@ -77,10 +79,7 @@ impl<T> Dynamic2DGrid<T> {
     }
 
     pub fn filter(&self, f: impl Fn(Option<&T>) -> bool) -> impl Iterator<Item = Option<&T>> {
-        self.data
-            .values()
-            .filter(move |v| f(Some(v)))
-            .map(|v| Some(v))
+        self.data.values().filter(move |v| f(Some(v))).map(Some)
     }
 
     pub fn indexed_filter(
@@ -136,25 +135,26 @@ impl<T> Dynamic2DGrid<T> {
         }
     }
 
-    pub fn cardinal_neighbors(&self, p: Point) -> impl Iterator<Item = Point> {
-        [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    pub fn cardinal_neighbors(&self, p: Point) -> impl Iterator<Item = &T> {
+        p.cardinal_neighbors()
             .into_iter()
-            .map(move |(dr, dc)| Point::new(p.r + dr, p.c + dc))
+            .filter_map(|p| self.get(&p))
     }
 
-    pub fn all_neighbors(&self, p: Point) -> impl Iterator<Item = Point> {
-        [
-            (-1, -1),
-            (-1, 0),
-            (-1, 1),
-            (0, -1),
-            (0, 1),
-            (1, -1),
-            (1, 0),
-            (1, 1),
-        ]
-        .into_iter()
-        .map(move |(dr, dc)| Point::new(p.r + dr, p.c + dc))
+    pub fn indexed_cardinal_neighbors(&self, p: Point) -> impl Iterator<Item = Point> {
+        p.cardinal_neighbors()
+            .into_iter()
+            .filter(|p| self.get(p).is_some())
+    }
+
+    pub fn all_neighbors(&self, p: Point) -> impl Iterator<Item = &T> {
+        p.all_neighbors().into_iter().filter_map(|p| self.get(&p))
+    }
+
+    pub fn indexed_all_neighbors(&self, p: Point) -> impl Iterator<Item = Point> {
+        p.all_neighbors()
+            .into_iter()
+            .filter(|p| self.get(p).is_some())
     }
 
     pub fn bounds(&self) -> Option<(Point, Point)> {
@@ -181,9 +181,17 @@ impl<T> Dynamic2DGrid<T> {
     }
 }
 
+impl<T> Default for Dynamic2DGrid<T> {
+    fn default() -> Self {
+        Self {
+            data: HashMap::default(),
+        }
+    }
+}
+
 impl<'a, T> IntoIterator for &'a Dynamic2DGrid<T> {
     type Item = &'a T;
-    type IntoIter = std::collections::hash_map::Values<'a, Point, T>;
+    type IntoIter = Values<'a, Point, T>;
     fn into_iter(self) -> Self::IntoIter {
         self.data.values()
     }
@@ -191,7 +199,7 @@ impl<'a, T> IntoIterator for &'a Dynamic2DGrid<T> {
 
 impl<'a, T> IntoIterator for &'a mut Dynamic2DGrid<T> {
     type Item = &'a mut T;
-    type IntoIter = std::collections::hash_map::ValuesMut<'a, Point, T>;
+    type IntoIter = ValuesMut<'a, Point, T>;
     fn into_iter(self) -> Self::IntoIter {
         self.data.values_mut()
     }
@@ -199,7 +207,7 @@ impl<'a, T> IntoIterator for &'a mut Dynamic2DGrid<T> {
 
 impl<T> IntoIterator for Dynamic2DGrid<T> {
     type Item = T;
-    type IntoIter = std::collections::hash_map::IntoValues<Point, T>;
+    type IntoIter = IntoValues<Point, T>;
     fn into_iter(self) -> Self::IntoIter {
         self.data.into_values()
     }

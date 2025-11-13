@@ -1,4 +1,4 @@
-use crate::point::u_point::UPoint;
+use crate::point::unsigned::UPoint;
 use ndarray::{
     Array2, Dim,
     iter::{IntoIter, Iter, IterMut},
@@ -152,41 +152,32 @@ impl<T> Static2DGrid<T> {
         }
     }
 
-    pub fn cardinal_neighbors(&self, r: usize, c: usize) -> impl Iterator<Item = UPoint> {
-        [(-1isize, 0), (1, 0), (0, -1), (0, 1)]
+    pub fn cardinal_neighbors(&self, r: usize, c: usize) -> impl Iterator<Item = &T> {
+        UPoint::new(r, c)
+            .cardinal_neighbors()
             .into_iter()
-            .filter_map(move |(dr, dc)| {
-                let nr = r.checked_add_signed(dr)?;
-                let nc = c.checked_add_signed(dc)?;
-                if self.in_bounds(nr, nc) {
-                    Some(UPoint::new(nr, nc))
-                } else {
-                    None
-                }
-            })
+            .filter_map(|p| self.get(p.r, p.c))
     }
 
-    pub fn all_neighbors(&self, r: usize, c: usize) -> impl Iterator<Item = UPoint> {
-        let deltas = [
-            (-1isize, -1),
-            (-1, 0),
-            (-1, 1),
-            (0, -1),
-            (0, 1),
-            (1, -1),
-            (1, 0),
-            (1, 1),
-        ];
+    pub fn all_neighbors(&self, r: usize, c: usize) -> impl Iterator<Item = &T> {
+        UPoint::new(r, c)
+            .all_neighbors()
+            .into_iter()
+            .filter_map(|p| self.get(p.r, p.c))
+    }
 
-        deltas.into_iter().filter_map(move |(dr, dc)| {
-            let nr = r.checked_add_signed(dr)?;
-            let nc = c.checked_add_signed(dc)?;
-            if self.in_bounds(nr, nc) {
-                Some(UPoint::new(nr, nc))
-            } else {
-                None
-            }
-        })
+    pub fn indexed_cardinal_neighbors(&self, r: usize, c: usize) -> impl Iterator<Item = UPoint> {
+        UPoint::new(r, c)
+            .cardinal_neighbors()
+            .into_iter()
+            .filter(|p| self.get(p.r, p.c).is_some())
+    }
+
+    pub fn indexed_all_neighbors(&self, r: usize, c: usize) -> impl Iterator<Item = UPoint> {
+        UPoint::new(r, c)
+            .all_neighbors()
+            .into_iter()
+            .filter(|p| self.get(p.r, p.c).is_some())
     }
 }
 
