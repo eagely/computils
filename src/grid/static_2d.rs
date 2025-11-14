@@ -1,4 +1,5 @@
 use crate::grid_point::unsigned::UGridPoint;
+
 use ndarray::{
     Array2, Dim,
     iter::{IntoIter, Iter, IterMut},
@@ -30,6 +31,14 @@ impl<T> Static2DGrid<T> {
 
     pub fn get_mut(&mut self, r: usize, c: usize) -> Option<&mut T> {
         self.data.get_mut((r, c))?.as_mut()
+    }
+
+    pub fn find(&self, target: Option<&T>) -> Option<UGridPoint>
+    where
+        T: PartialEq,
+    {
+        self.indexed_iter()
+            .find_map(|(r, c, cell)| (cell.as_ref() == target).then(|| UGridPoint::new(r, c)))
     }
 
     pub fn set(&mut self, r: usize, c: usize, v: T) -> Option<T> {
